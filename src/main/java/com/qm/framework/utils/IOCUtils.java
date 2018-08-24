@@ -15,13 +15,19 @@ import com.qm.framework.beanFactory.ListBeanFactory;
  */
 public class IOCUtils {
 	
-	
+	/**
+	 * @Author qiumin
+	 * @Description 实现依赖注入的方法
+	 * @Date 2018/8/20 10:17
+	 * @Param []
+	 * @return void
+	 **/
 	public static void dependInjectOject(){
-		Map<Class<?>, Object> beanmapSet = ListBeanFactory.getBeanmapSet();
-		if(beanmapSet == null || beanmapSet.size() == 0 ){
+		Map<Class<?>, Object> beanMapSet = ListBeanFactory.getBeanMap();
+		if(beanMapSet == null || beanMapSet.size() == 0 ){
 			return;
 		}
-		for(Entry<Class<?>, Object> entry:beanmapSet.entrySet()){
+		for(Entry<Class<?>, Object> entry:beanMapSet.entrySet()){
 			Class<?> key = entry.getKey();
 			Object bean = entry.getValue();
 			//获取key的所有字段
@@ -33,7 +39,7 @@ public class IOCUtils {
 				Class<?> type = f.getType();//得到字段类型
 				if(f.isAnnotationPresent(QAutworied.class)){
 					if(!type.isInterface()){//字段不是接口，直接注入
-						Object fieldValue = beanmapSet.get(type);
+						Object fieldValue = beanMapSet.get(type);
 						if(fieldValue == null){
 							throw new RuntimeException("not found ["+type.getName()+"] class");
 						}
@@ -46,7 +52,7 @@ public class IOCUtils {
 						}else{
 							Object value = null;
 							for(Class<?> c:subClass){
-								value = beanmapSet.get(c);
+								value = beanMapSet.get(c);
 							}
 							//若为null，则表示beanFactory未初始化成功
 							if(value == null){

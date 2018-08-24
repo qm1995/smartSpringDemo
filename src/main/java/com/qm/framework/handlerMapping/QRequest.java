@@ -1,6 +1,8 @@
 package com.qm.framework.handlerMapping;
 
 
+import com.qm.framework.enumType.QRequestMethod;
+
 /**
  * 映射器
  * 用来存储请求路径，和方法名称
@@ -37,6 +39,9 @@ public class QRequest {
 
 	@Override
 	public int hashCode() {
+	    if(QRequestMethod.ALL.getMethod().equals(method)){
+	        return 1;
+        }
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + ((method == null) ? 0 : method.hashCode());
@@ -53,6 +58,9 @@ public class QRequest {
 		if (getClass() != obj.getClass())
 			return false;
 		QRequest other = (QRequest) obj;
+		if (QRequestMethod.ALL.getMethod().equals(other.getMethod())){
+		    return true;
+        }
 		if (method == null) {
 			if (other.method != null)
 				return false;

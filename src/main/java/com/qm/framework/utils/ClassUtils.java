@@ -117,7 +117,7 @@ public class ClassUtils {
 	}
 	
 	/**
-	 * 判断child有没有实现parent
+	 * 判断child是不是parent的实现类
 	 * @param parent
 	 * @param child
 	 * @return
@@ -133,12 +133,5 @@ public class ClassUtils {
 			}
 		}
 		return false;
-	}
-	public static void main(String[] args) {
-		Set<Class<?>> classes = getClasses("com.qm");
-		for(Class<?> c:classes){
-			System.out.println(c.getName());
-		}
-		System.out.println(classes.size());
 	}
 }

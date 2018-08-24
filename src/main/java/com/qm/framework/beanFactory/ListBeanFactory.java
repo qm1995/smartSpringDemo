@@ -1,19 +1,19 @@
 package com.qm.framework.beanFactory;
 
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.qm.framework.annotation.QController;
 import com.qm.framework.annotation.QService;
 import com.qm.framework.constant.Constant;
+import com.qm.framework.interceptor.HandlerInterceptor;
 import com.qm.framework.utils.ClassUtils;
 import com.qm.framework.utils.ReflectUtil;
 
 public abstract class ListBeanFactory implements BeanFactory {
 	
-	protected static final Map<Class<?>, Object> BEANMAP_SET = new ConcurrentHashMap<>();
+	protected static final Map<Class<?>, Object> BEAN_MAP = new ConcurrentHashMap<>();
+	protected static final Map<Class<?>, HandlerInterceptor> INTERCEPTOR_BEAN_MAP = new ConcurrentHashMap<>();
 	private static final Set<Class<?>> CLASSES;
 	static{
 		CLASSES = ClassUtils.getClasses(Constant.getInstance().getPackagePath());
@@ -44,20 +44,50 @@ public abstract class ListBeanFactory implements BeanFactory {
 		allClasses.addAll(getServiceClass());
 		return allClasses;
 	}
+
+	private static Set<Class<?>> getInterceptorSet(){
+        Set<Class<?>> interceptorClasses = new HashSet<>();
+        for(Class<?> c:CLASSES){
+            if(ClassUtils.isSubClass(HandlerInterceptor.class,c)){
+                interceptorClasses.add(c);
+            }
+        }
+        return interceptorClasses;
+    }
 	private static void fillBeanMap(){
 		Set<Class<?>> allClasses = getClassSet();
 		for(Class<?> c: allClasses){
-			if(!BEANMAP_SET.containsKey(c)){
+			if(!BEAN_MAP.containsKey(c)){
 				Object instances = ReflectUtil.getInstances(c);
-				BEANMAP_SET.put(c, instances);
+				BEAN_MAP.put(c, instances);
 			}
 		}
 	}
-	
-	public static Map<Class<?>, Object> getBeanmapSet() {
-		return BEANMAP_SET;
+
+    private static void fillInterceptorBeanMap(){
+        Set<Class<?>> interceptorClassSet = getInterceptorSet();
+        for(Class<?> c: interceptorClassSet){
+            if(!INTERCEPTOR_BEAN_MAP.containsKey(c)){
+                Object instances = ReflectUtil.getInstances(c);
+                INTERCEPTOR_BEAN_MAP.put(c, (HandlerInterceptor)instances);
+            }
+        }
+    }
+
+	public static Map<Class<?>, Object> getBeanMap() {
+		return BEAN_MAP;
+	}
+	public static Map<Class<?>, HandlerInterceptor> getInterceptorBeanMap() {
+		return INTERCEPTOR_BEAN_MAP;
 	}
 
+	public static List<HandlerInterceptor> getInterceptorList(){
+	    List<HandlerInterceptor> interceptorList = new ArrayList<>();
+	    for (Map.Entry<Class<?> ,HandlerInterceptor> map : INTERCEPTOR_BEAN_MAP.entrySet()){
+	        interceptorList.add(map.getValue());
+        }
+        return interceptorList;
+    }
 	public static Set<Class<?>> getSubClass(Class<?> parent){
 		Set<Class<?>> subClassSet = new HashSet<>();
 		for(Class<?> c:CLASSES){
@@ -69,7 +99,7 @@ public abstract class ListBeanFactory implements BeanFactory {
 	}
 
 	public static Object getObject(Class<?> clazz){
-		return BEANMAP_SET.get(clazz);
+		return BEAN_MAP.get(clazz);
 	}
 	
 	

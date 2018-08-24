@@ -1,7 +1,6 @@
 package com.qm.framework.controller;
 
 import java.io.IOException;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
@@ -14,16 +13,16 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.qm.framework.chain.HandlerChain;
+import com.qm.framework.handlerMapping.DefaultHandlerMapping;
+import com.qm.framework.handlerMapping.HandlerMapping;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.qm.framework.beanFactory.ListBeanFactory;
 import com.qm.framework.constant.Constant;
-import com.qm.framework.handlerMapping.Handler;
 import com.qm.framework.utils.ClassCastUtil;
 import com.qm.framework.utils.ControllerUtils;
 import com.qm.framework.utils.IOCUtils;
-import com.qm.framework.utils.ReflectUtil;
 import com.qm.framework.utils.StringUtils;
 import com.qm.framework.utils.WebUtils;
 
@@ -34,7 +33,7 @@ public class ManagerServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 	private static final Logger logger = LoggerFactory.getLogger(ManagerServlet.class);
 	private static final String PACKAGE_PATH = "PACKAGE_PATH";
-	
+	private static HandlerMapping handlerMapping = new DefaultHandlerMapping();
     /**
      * @see HttpServlet#HttpServlet()
      */
@@ -62,7 +61,7 @@ public class ManagerServlet extends HttpServlet {
         //依赖注入
         IOCUtils.dependInjectOject();
         //用来封装每个controller的信息
-        ControllerUtils.init(); 
+        ControllerUtils.init(handlerMapping);
 		super.init();
 		logger.debug("{}初始化完成--------------", ManagerServlet.class.getName());
 	}
@@ -82,12 +81,15 @@ public class ManagerServlet extends HttpServlet {
 		if(contextPath == null || contextPath.length() <= 0){
 			WebUtils.sendError(response, 404, "页面不存在");
 		}
-		String url = requestURI.substring(contextPath.length());
 		logger.debug("请求方式{},请求路径{},",method,requestURI);
-		Handler handler = ControllerUtils.getHandler(url.substring(0,url.lastIndexOf(".")==-1?url.length():url.lastIndexOf(".")), method);
-		if(handler != null){
-			
-			Class<?> controllerClass = handler.getControllerClass();
+        HandlerChain handler = handlerMapping.getHandler(request);
+        if(handler != null){
+            boolean preHandler = handler.applyPreHandler(request, response);
+            if(!preHandler){
+                return;
+            }
+            Object handlerAdaptor = handler.getHandler();
+			/*Class<?> controllerClass = handler.getControllerClass();
 			Method method2 = handler.getMethod();
 			Object object = ListBeanFactory.getObject(controllerClass);
 			List<Object> paramValue = getValue(request, handler.getParam(),response);
@@ -95,10 +97,9 @@ public class ManagerServlet extends HttpServlet {
 			logger.debug("类{}中的{}方法被访问，参数param{}，返回视图结果{}",controllerClass.getName(),method2.getName(),paramValue.toArray(),(String)view);
 			//response.sendRedirect(request.getContextPath()+"/"+(String)view+".jsp");
 			request.getRequestDispatcher("/"+(String)view+".jsp").forward(request, response);
-			test(request);
+			test(request);*/
 			return;
 		}else{
-			
 			WebUtils.sendError(response, 404, "页面不存在");
 		}
 	}
