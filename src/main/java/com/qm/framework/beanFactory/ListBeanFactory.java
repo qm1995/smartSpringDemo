@@ -18,6 +18,7 @@ public abstract class ListBeanFactory implements BeanFactory {
 	static{
 		CLASSES = ClassUtils.getClasses(Constant.getInstance().getPackagePath());
 		fillBeanMap();
+		fillInterceptorBeanMap();
 	}
 	public static Set<Class<?>> getServiceClass(){
 		Set<Class<?>> serviceClasses = new HashSet<Class<?>>();
@@ -86,6 +87,12 @@ public abstract class ListBeanFactory implements BeanFactory {
 	    for (Map.Entry<Class<?> ,HandlerInterceptor> map : INTERCEPTOR_BEAN_MAP.entrySet()){
 	        interceptorList.add(map.getValue());
         }
+        Collections.sort(interceptorList, new Comparator<HandlerInterceptor>() {
+            @Override
+            public int compare(HandlerInterceptor o1, HandlerInterceptor o2) {
+                return o1.getOrder()-o2.getOrder();
+            }
+        });
         return interceptorList;
     }
 	public static Set<Class<?>> getSubClass(Class<?> parent){

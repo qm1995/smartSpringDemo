@@ -8,7 +8,7 @@ import javax.servlet.http.HttpServletResponse;
  * @author: qiumin
  * @create: 2018-08-20 11:25
  **/
-public interface HandlerInterceptor {
+public interface HandlerInterceptor{
 
     /**
      * @Author qiumin
@@ -27,4 +27,12 @@ public interface HandlerInterceptor {
      * @return void
      **/
     void afterHandler(HttpServletRequest request,HttpServletResponse response);
+
+    /**
+     * @Author qiumin
+     * @Description 拦截器顺序数
+     * @Date 2018/8/25 11:28
+     * @return int
+     **/
+    int getOrder();
 }

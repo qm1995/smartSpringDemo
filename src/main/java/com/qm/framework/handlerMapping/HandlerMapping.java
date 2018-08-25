@@ -13,5 +13,4 @@ public interface HandlerMapping {
 
     HandlerChain getHandler(HttpServletRequest request);
 
-    void put(QRequest request,HandlerChain chain);
 }
