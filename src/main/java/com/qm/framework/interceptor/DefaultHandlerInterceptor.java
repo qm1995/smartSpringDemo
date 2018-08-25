@@ -12,7 +12,7 @@ import javax.servlet.http.HttpServletResponse;
  **/
 public class DefaultHandlerInterceptor implements HandlerInterceptor{
     @Override
-    public boolean preHandler(HttpServletRequest request, HttpServletResponse response) {
+    public boolean preHandler(HttpServletRequest request, HttpServletResponse response,Object handler) {
         System.out.println("默认拦截器-------拦截器前的操作");
         return true;
     }

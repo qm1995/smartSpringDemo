@@ -13,6 +13,8 @@ import javax.servlet.http.HttpServletResponse;
 import com.qm.framework.chain.HandlerChain;
 import com.qm.framework.handlerMapping.DefaultHandlerMapping;
 import com.qm.framework.handlerMapping.HandlerMapping;
+import com.qm.framework.view.ModelAndView;
+import com.qm.framework.view.ViewResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -81,9 +83,9 @@ public class ManagerServlet extends HttpServlet {
                 if (!preHandler) {
                     return;
                 }
-                String view = handlerChain.invokeMethod(request, response);
+                ModelAndView view = handlerChain.invokeMethod(request, response);
                 handlerChain.applyAfterHandler(request, response);
-                WebUtils.forward(request,response,view);
+                ViewResolver.resolverView(request,response,view);
             } else {
                 WebUtils.sendError(response, 404, "页面不存在");
             }

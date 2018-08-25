@@ -2,13 +2,16 @@ package com.qm.framework.chain;
 
 
 import com.alibaba.fastjson.JSON;
+import com.qm.framework.annotation.QResponseBody;
 import com.qm.framework.handlerMapping.HandlerMethod;
 import com.qm.framework.interceptor.HandlerInterceptor;
 import com.qm.framework.utils.ClassCastUtil;
 import com.qm.framework.utils.ReflectUtil;
+import com.qm.framework.view.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -23,12 +26,12 @@ public class HandlerChain {
 
     private Object handler;
 
-    private HandlerMethod handleAdaptor;
+    private HandlerMethod handlerMethod;
 
-    public HandlerChain(List<HandlerInterceptor> interceptors, Object handler,HandlerMethod handleAdaptor) {
+    public HandlerChain(List<HandlerInterceptor> interceptors, Object handler,HandlerMethod handlerMethod) {
         this.interceptors = interceptors;
         this.handler = handler;
-        this.handleAdaptor = handleAdaptor;
+        this.handlerMethod = handlerMethod;
 
     }
 
@@ -48,18 +51,18 @@ public class HandlerChain {
         this.handler = handler;
     }
 
-    public HandlerMethod getHandleAdaptor() {
-        return handleAdaptor;
+    public HandlerMethod getHandlerMethod() {
+        return handlerMethod;
     }
 
-    public void setHandleAdaptor(HandlerMethod handleAdaptor) {
-        this.handleAdaptor = handleAdaptor;
+    public void setHandlerMethod(HandlerMethod handlerMethod) {
+        this.handlerMethod = handlerMethod;
     }
 
     public boolean applyPreHandler(HttpServletRequest request, HttpServletResponse response){
         if(interceptors != null && interceptors.size() > 0){
             for(HandlerInterceptor interceptor : interceptors){
-                if(!interceptor.preHandler(request,response)){
+                if(!interceptor.preHandler(request,response,handler)){
                     return false;
                 }
             }
@@ -75,13 +78,18 @@ public class HandlerChain {
         }
     }
 
-    public String invokeMethod(HttpServletRequest request,HttpServletResponse response){
-        List<Object> value = getValue(request, handleAdaptor.getParam(), response);
-        Object result = ReflectUtil.invokeMethod(handler, handleAdaptor.getMethod(), value);
-        if(result instanceof String){
-            return (String)result;
+    public ModelAndView invokeMethod(HttpServletRequest request,HttpServletResponse response){
+        List<Object> value = getValue(request, handlerMethod.getParam(), response);
+        Method method = handlerMethod.getMethod();
+        Object result = ReflectUtil.invokeMethod(handler, method, value);
+        ModelAndView view = new ModelAndView();
+        if(method.getAnnotation(QResponseBody.class) != null ||
+                handler.getClass().getAnnotation(QResponseBody.class) != null){
+            view.setData(result);
+        }else{
+            view.setView(result.toString());
         }
-        return JSON.toJSONString(result);
+        return view;
 
     }
 

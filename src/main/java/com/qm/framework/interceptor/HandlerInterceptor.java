@@ -14,10 +14,10 @@ public interface HandlerInterceptor{
      * @Author qiumin
      * @Description 拦截器前处理的逻辑
      * @Date 2018/8/20 11:27
-     * @Param [request, response]
+     * @Param [request, response,handler]
      * @return boolean
      **/
-    boolean preHandler(HttpServletRequest request, HttpServletResponse response);
+    boolean preHandler(HttpServletRequest request, HttpServletResponse response,Object handler);
 
     /**
      * @Author qiumin

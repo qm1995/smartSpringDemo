@@ -78,14 +78,7 @@ public class DefaultHandlerMapping implements HandlerMapping{
 
     @Override
     public HandlerChain getHandler(HttpServletRequest request){
-        String method = request.getMethod();
-        String requestURI = request.getRequestURI();
-        String contextPath = request.getContextPath();
-        String url = requestURI.substring(contextPath.length());// 结果为映射路径
-
-        QRequest qRequest = new QRequest(url,method);
-        HandlerMethod handlerMethod = getHandlerMethod(qRequest,request);
-
+        HandlerMethod handlerMethod = getHandlerMethod(request);
         if(handlerMethod == null){
             return null;
         }
@@ -94,13 +87,15 @@ public class DefaultHandlerMapping implements HandlerMapping{
 
     }
 
-    private HandlerMethod getHandlerMethod(QRequest qRequest,HttpServletRequest request){
+    private HandlerMethod getHandlerMethod(HttpServletRequest request){
+        String method = request.getMethod().toLowerCase();
+        String requestURI = request.getRequestURI();
+        String contextPath = request.getContextPath();
+        String currentRequestPath = requestURI.substring(contextPath.length());// 结果为映射路径
+
+        QRequest qRequest = new QRequest(currentRequestPath,method);
         HandlerMethod handlerMethod = this.REGISTER_MAP.get(qRequest);
         if(handlerMethod == null){
-            String requestURI = request.getRequestURI();
-            String contextPath = request.getContextPath();
-            String currentRequestPath = requestURI.substring(contextPath.length());// 结果为映射路径
-            String method = request.getMethod().toLowerCase();
             for (Map.Entry<QRequest,HandlerMethod> map : this.REGISTER_MAP.entrySet()){
                 QRequest key = map.getKey();
                 HandlerMethod value = map.getValue();
