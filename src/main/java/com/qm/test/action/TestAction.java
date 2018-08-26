@@ -19,7 +19,7 @@ public class TestAction {
 						,@QRequestParam("age") Integer age){
 		User user = userService.getUser(username);
 		user.setAge(age);
-		request.setAttribute("user", user);
+		//request.setAttribute("user", user);
 		return user;
 	}
 }

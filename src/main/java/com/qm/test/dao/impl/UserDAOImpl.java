@@ -2,11 +2,11 @@ package com.qm.test.dao.impl;
 
 import com.qm.framework.annotation.QService;
 import com.qm.test.bean.User;
-import com.qm.test.dao.UserDao;
+import com.qm.test.dao.UserDAO;
 
 
 @QService
-public class UserDaoImpl implements UserDao {
+public class UserDAOImpl implements UserDAO {
 
 	@Override
 	public User getUser(String username) {

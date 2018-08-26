@@ -3,7 +3,7 @@ package com.qm.test.service.impl;
 import com.qm.framework.annotation.QAutworied;
 import com.qm.framework.annotation.QService;
 import com.qm.test.bean.User;
-import com.qm.test.dao.UserDao;
+import com.qm.test.dao.UserDAO;
 import com.qm.test.service.UserService;
 
 
@@ -11,12 +11,12 @@ import com.qm.test.service.UserService;
 public class UserServiceImpl implements UserService {
 	
 	@QAutworied
-	private UserDao userDao;
+	private UserDAO userDAO;
 	
 	@Override
 	public User getUser(String username) {
 		// TODO Auto-generated method stub
-		return userDao.getUser(username);
+		return userDAO.getUser(username);
 	}
 	
 }
