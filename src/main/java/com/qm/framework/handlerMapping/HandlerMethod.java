@@ -8,14 +8,17 @@ import java.util.Map;
  * @author qiumin
  *
  */
-public class HandlerAdaptor {
-	
+public class HandlerMethod {
+
+	private Object handler;
+
 	private Method method;
 	//method对应的参数，参数名称，和类型
 	private Map<String,Class<?>> param;
 
-	public HandlerAdaptor(Method method, Map<String, Class<?>> param) {
+	public HandlerMethod(Method method, Object handler, Map<String, Class<?>> param) {
 		super();
+		this.handler = handler;
 		this.method = method;
 		this.param = param;
 	}
@@ -37,8 +40,12 @@ public class HandlerAdaptor {
 		this.param = param;
 	}
 
-	
-	
-	
-	
+
+    public Object getHandler() {
+        return handler;
+    }
+
+    public void setHandler(Object handler) {
+        this.handler = handler;
+    }
 }

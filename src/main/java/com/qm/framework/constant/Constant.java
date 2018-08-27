@@ -1,7 +1,7 @@
 package com.qm.framework.constant;
 
 /**
- * 常量类
+ * 存储扫描路径的单例类
  * @author qiumin
  *
  */
@@ -11,7 +11,7 @@ public final class Constant {
 	private Constant(){}
 	public static Constant getInstance(){
 		if(constant == null){
-			synchronized(new Object()){
+			synchronized(Constant.class){
 				if(constant == null){
 					constant = new Constant();
 				}

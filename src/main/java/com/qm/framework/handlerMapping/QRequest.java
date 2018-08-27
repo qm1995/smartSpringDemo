@@ -39,12 +39,8 @@ public class QRequest {
 
 	@Override
 	public int hashCode() {
-	    if(QRequestMethod.ALL.getMethod().equals(method)){
-	        return 1;
-        }
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((method == null) ? 0 : method.hashCode());
 		result = prime * result + ((url == null) ? 0 : url.hashCode());
 		return result;
 	}
@@ -58,7 +54,7 @@ public class QRequest {
 		if (getClass() != obj.getClass())
 			return false;
 		QRequest other = (QRequest) obj;
-		if (QRequestMethod.ALL.getMethod().equals(other.getMethod())){
+		if (QRequestMethod.ALL.getMethod().equals(method) || QRequestMethod.ALL.getMethod().equals(other.method)){
 		    return true;
         }
 		if (method == null) {
@@ -73,6 +69,12 @@ public class QRequest {
 			return false;
 		return true;
 	}
-	
-	
+
+    @Override
+    public String toString() {
+        return "QRequest{" +
+                "url='" + url + '\'' +
+                ", method='" + method + '\'' +
+                '}';
+    }
 }

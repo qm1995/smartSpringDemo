@@ -1,10 +1,7 @@
 package com.qm.framework.controller;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
 
 import javax.servlet.ServletConfig;
@@ -16,6 +13,8 @@ import javax.servlet.http.HttpServletResponse;
 import com.qm.framework.chain.HandlerChain;
 import com.qm.framework.handlerMapping.DefaultHandlerMapping;
 import com.qm.framework.handlerMapping.HandlerMapping;
+import com.qm.framework.view.ModelAndView;
+import com.qm.framework.view.ViewResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,7 +32,7 @@ public class ManagerServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 	private static final Logger logger = LoggerFactory.getLogger(ManagerServlet.class);
 	private static final String PACKAGE_PATH = "PACKAGE_PATH";
-	private static HandlerMapping handlerMapping = new DefaultHandlerMapping();
+	private static HandlerMapping handlerMapping;
     /**
      * @see HttpServlet#HttpServlet()
      */
@@ -60,8 +59,7 @@ public class ManagerServlet extends HttpServlet {
         Constant.getInstance().setPackagePath(package_path);
         //依赖注入
         IOCUtils.dependInjectOject();
-        //用来封装每个controller的信息
-        ControllerUtils.init(handlerMapping);
+        handlerMapping = new DefaultHandlerMapping();
 		super.init();
 		logger.debug("{}初始化完成--------------", ManagerServlet.class.getName());
 	}
@@ -77,55 +75,25 @@ public class ManagerServlet extends HttpServlet {
 		request.setCharacterEncoding("utf-8");
 		String method = request.getMethod().toLowerCase();
 		String requestURI = request.getRequestURI();
-		String contextPath = request.getContextPath();
-		if(contextPath == null || contextPath.length() <= 0){
-			WebUtils.sendError(response, 404, "页面不存在");
-		}
-		logger.debug("请求方式{},请求路径{},",method,requestURI);
-        HandlerChain handler = handlerMapping.getHandler(request);
-        if(handler != null){
-            boolean preHandler = handler.applyPreHandler(request, response);
-            if(!preHandler){
-                return;
+		logger.debug("请求方式{},请求路径{}",method,requestURI);
+        HandlerChain handlerChain = handlerMapping.getHandler(request);
+        try {
+            if (handlerChain != null) {
+                boolean preHandler = handlerChain.applyPreHandler(request, response);
+                if (!preHandler) {
+                    return;
+                }
+                ModelAndView view = handlerChain.invokeMethod(request, response);
+                handlerChain.applyAfterHandler(request, response);
+                ViewResolver.resolverView(request,response,view);
+            } else {
+                WebUtils.sendError(response, 404, "页面不存在");
             }
-            Object handlerAdaptor = handler.getHandler();
-			/*Class<?> controllerClass = handler.getControllerClass();
-			Method method2 = handler.getMethod();
-			Object object = ListBeanFactory.getObject(controllerClass);
-			List<Object> paramValue = getValue(request, handler.getParam(),response);
-			Object view = ReflectUtil.invokeMethod(object, method2, paramValue);
-			logger.debug("类{}中的{}方法被访问，参数param{}，返回视图结果{}",controllerClass.getName(),method2.getName(),paramValue.toArray(),(String)view);
-			//response.sendRedirect(request.getContextPath()+"/"+(String)view+".jsp");
-			request.getRequestDispatcher("/"+(String)view+".jsp").forward(request, response);
-			test(request);*/
-			return;
-		}else{
-			WebUtils.sendError(response, 404, "页面不存在");
-		}
-	}
+        } catch (Exception e){
+            WebUtils.sendError(response,500,e.toString());
+        }
+    }
 	
-	
-	public List<Object> getValue(HttpServletRequest request,Map<String,Class<?>> paramMap,HttpServletResponse response){
-		List<Object> paramValue = new ArrayList<>();
-		for(Entry<String, Class<?>> m:paramMap.entrySet()){
-			String paramName = m.getKey();
-			Class<?> paramType = m.getValue();
-			if(paramType == String.class){
-				paramValue.add(request.getParameter(paramName));
-			}else if(paramType == int.class || paramType == Integer.class){
-				String parameter = request.getParameter(paramName);
-				paramValue.add(ClassCastUtil.StringToInt(parameter));
-			}else if(paramType == long.class || paramType == Long.class){
-				String parameter = request.getParameter(paramName);
-				paramValue.add(ClassCastUtil.StringToLong(parameter));
-			}else if(paramType == HttpServletRequest.class){
-				paramValue.add(request);
-			}else if(paramType == HttpServletResponse.class){
-				paramValue.add(response);
-			}
-		}
-		return paramValue;
-	}
 	/**
 	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
 	 */
@@ -133,14 +101,5 @@ public class ManagerServlet extends HttpServlet {
 		// TODO Auto-generated method stub
 		doGet(request, response);
 	}
-	
-	
-	private void test(HttpServletRequest request){
-		Enumeration<String> attributeNames = request.getAttributeNames();
-		System.out.println((attributeNames == null)+"::"+attributeNames.hasMoreElements());
-		while(attributeNames.hasMoreElements()){
-			String element = attributeNames.nextElement();
-			System.out.println("element="+element);
-		}
-	}
+
 }
